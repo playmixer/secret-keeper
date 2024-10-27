@@ -94,7 +94,8 @@ go build -ldflags "-X main.buildVersion=v1.0.0 -X 'main.buildDate=$(date +'%Y/%m
 go run -ldflags "-X main.buildVersion=1.0.0 -X 'main.buildDate=$(date +'%Y/%m/%d %H:%M:%S')' -X 'main.buildCommit=$(git show --oneline -s)'" ./cmd/client/client.go
 ```
 
-### Enviorements .env.client
+### Enviorements 
+рядом с клиентом положить файл *.env.client*
 ```env
 API_ADDRESS=https://localhost:8443
 LOG_LEVEL=debug
