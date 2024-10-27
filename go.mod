@@ -1,6 +1,6 @@
 module github.com/playmixer/secret-keeper
 
-go 1.23.2
+go 1.22.3
 
 require (
 	github.com/caarlos0/env/v11 v11.2.2
