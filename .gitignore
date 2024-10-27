@@ -1,0 +1,8 @@
+.env
+.env.*
+*.exe
+
+golangci-lint
+data
+logs
+app

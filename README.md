@@ -52,7 +52,80 @@ GophKeeper представляет собой клиент-серверную �
 
 
 
-# build client
+# Server GophKeeper
+### Run server
 ```bash
-go build -ldflags "-X main.buildVersion=v1.0.1 -X 'main.buildDate=$(date +'%Y/%m/%d %H:%M:%S')' -X 'main.buildCommit=$(git show --oneline -s)'" ./cmd/client/client.go
+git clone https://github.com/playmixer/secret-keeper.git
+cd secret-keeper/deploy
+docker-compose up
+```
+
+### enviorement example
+```env
+REST_ADDRESS=localhost:8080
+SSL_ENABLE=1
+LOG_LEVEL=debug
+LOG_PATH=./logs/server.log
+SECRET_KEY=secret_key
+DATABASE_STRING=postgres://root:root@localhost:5432/keeper?sslmode=disable
+ENCRYPT_KEY=RZLMAOIOuljexYLh5S47O9kfVI7O1Ll0
+```
+для ENCRYPT_KEY длина должна быть 32 символа
+
+### generate swag and run
+```bash
+swag init -o ./docs -g ./internal/adapter/api/rest/rest.go
+swag fmt
+go run ./cmd/server/server.go
+```
+ссылка на swagger
+https://localhost:8443/swagger/index.html
+
+
+
+# Client GophKeeper
+### Build client
+```bash
+go build -ldflags "-X main.buildVersion=v1.0.0 -X 'main.buildDate=$(date +'%Y/%m/%d %H:%M:%S')' -X 'main.buildCommit=$(git show --oneline -s)'" ./cmd/client/client.go
+```
+
+### Run client
+```bash
+go run -ldflags "-X main.buildVersion=1.0.0 -X 'main.buildDate=$(date +'%Y/%m/%d %H:%M:%S')' -X 'main.buildCommit=$(git show --oneline -s)'" ./cmd/client/client.go
+```
+
+### Enviorements .env.client
+```env
+API_ADDRESS=https://localhost:8443
+LOG_LEVEL=debug
+LOG_PATH=./logs/client.log
+FILE_MAX_SIZE=819200
+```
+
+### Тесты
+в работе
+
+
+
+### fix fieldalignment
+```
+go install golang.org/x/tools/go/analysis/passes/fieldalignment/cmd/fieldalignment@latest
+```
+```
+fieldalignment -fix <package_path>
+```
+
+
+#### Generate private key (.key)
+```
+# Key considerations for algorithm "RSA" ≥ 2048-bit
+openssl genrsa -out server.key 2048
+
+# Key considerations for algorithm "ECDSA" ≥ secp384r1
+# List ECDSA the supported curves (openssl ecparam -list_curves)
+openssl ecparam -genkey -name secp384r1 -out server.key
+```
+#### Generation of self-signed(x509) public key (PEM-encodings .pem|.crt) based on the private (.key)
+```
+openssl req -new -x509 -sha256 -key server.key -out server.crt -days 3650
 ```

@@ -1,0 +1,1 @@
+mockgen -source=F:\Projects\Go\src\goph-keeper\internal\adapter\storage\database\database.go -package=database > .\internal\mocks\storage\database\database.go

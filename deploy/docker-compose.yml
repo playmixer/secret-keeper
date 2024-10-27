@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  database:
+    container_name: database
+    image: postgres
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: keeper
+      PGDATA: /data/postgres
+    volumes:
+      - ./data/postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - backend
+
+  gophkeeper:
+    build: 
+      context: ./..
+      dockerfile: ./deploy/Dockerfile
+    container_name: gophkeeper
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    environment:
+      - REST_ADDRESS=:8443
+      - SSL_ENABLE=1
+      - LOG_LEVEL=debug
+      - LOG_PATH=./logs/server.log
+      - SECRET_KEY=secret_key
+      - DATABASE_STRING=postgres://root:root@database:5432/keeper?sslmode=disable
+      - ENCRYPT_KEY=RZLMAOIOuljexYLh5S47O9kfVI7O1Ll0
+    volumes:
+      - ./logs:/app/logs
+      - ../cert:/app/cert
+    depends_on:
+      - database
+    restart: always
+    networks:
+      - backend
+
+networks:
+  backend:
