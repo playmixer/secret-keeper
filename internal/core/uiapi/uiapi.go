@@ -74,7 +74,8 @@ func New(ctx context.Context, store store, lgr *zap.Logger, options ...option) (
 		workerEnabled: true,
 		apiURL:        "https://localhost:8443",
 	}
-	k.newRequest = newRequest(k) // nolint:staticcheck
+	//nolint
+	k.newRequest = newRequest(k)
 
 	for _, opt := range options {
 		opt(k)
