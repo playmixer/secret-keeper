@@ -282,7 +282,7 @@ func (k *keepClient) eventDeleteData(id int64) error {
 	return nil
 }
 
-func newRequest(k *keepClient) func(method string, url string, data *[]byte) (*http.Response, error) {
+func newRequest(k *keepClient) keepRequest {
 	return func(method, url string, data *[]byte) (*http.Response, error) {
 		tr := &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},

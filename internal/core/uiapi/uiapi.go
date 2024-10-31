@@ -36,10 +36,12 @@ var (
 	periodTickWorker time.Duration = 10 * time.Second
 )
 
+type keepRequest func(method string, url string, data *[]byte) (*http.Response, error)
+
 type keepClient struct {
 	store         store
 	log           *zap.Logger
-	newRequest    func(method string, url string, data *[]byte) (*http.Response, error)
+	newRequest    keepRequest
 	apiURL        string
 	token         string
 	fileMaxSize   int64
@@ -74,7 +76,7 @@ func New(ctx context.Context, store store, lgr *zap.Logger, options ...option) (
 		workerEnabled: true,
 		apiURL:        "https://localhost:8443",
 	}
-	//nolint:all
+
 	k.newRequest = newRequest(k)
 
 	for _, opt := range options {
