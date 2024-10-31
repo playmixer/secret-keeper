@@ -1,6 +1,8 @@
 package uiapi
 
-import "github.com/playmixer/secret-keeper/internal/adapter/models"
+import (
+	"github.com/playmixer/secret-keeper/internal/adapter/models"
+)
 
 type tResultResponse struct {
 	Message string `json:"message"`

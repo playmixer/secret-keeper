@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"log"
 
+	"go.uber.org/zap"
+
 	"github.com/playmixer/secret-keeper/internal/adapter/api/rest"
 	"github.com/playmixer/secret-keeper/internal/adapter/logger"
 	"github.com/playmixer/secret-keeper/internal/adapter/storage/database"
 	"github.com/playmixer/secret-keeper/internal/core/config"
 	"github.com/playmixer/secret-keeper/internal/core/keeper"
-	"go.uber.org/zap"
 )
 
 func main() {

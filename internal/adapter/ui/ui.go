@@ -171,11 +171,15 @@ func (t *terminal) registratingPage() {
 				t.errorPage(fmt.Sprintf("Ошибка регистрации: %v", err), func() { t.registratingPage() })
 				return
 			}
-			if err := t.Run(&isDraw); err != nil {
-				t.errorPage(err.Error(), func() {
-					t.authPage()
-				})
-			}
+			t.modal("Вы успешно зарегестрировались", map[string]func(){
+				"Ok": func() {
+					if err := t.Run(&isDraw); err != nil {
+						t.errorPage(err.Error(), func() {
+							t.authPage()
+						})
+					}
+				},
+			})
 		}).
 		AddButton(btnLableBack, func() {
 			if err := t.Run(&isDraw); err != nil {
@@ -365,7 +369,7 @@ func (t *terminal) editTextPage(id int64) {
 		AddButton(btnLabelDelete, func() {
 			t.modal(fmt.Sprintf("Удалить текст `%s`", txt.Title), map[string]func(){
 				"Да": func() {
-					err := t.api.EventDeleteCard(id)
+					err := t.api.EventDeleteText(id)
 					if err != nil {
 						t.errorPage(fmt.Sprintf("Ошибка удаления текста `%v`: %v", id, err), func() { t.editTextPage(id) })
 						return

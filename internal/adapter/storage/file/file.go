@@ -124,7 +124,7 @@ func (s *Storage) UpdateDate() int64 {
 	return time.Now().UTC().Unix()
 }
 
-func (s *Storage) WriteFile(filename string, data *[]byte) error {
+func (s *Storage) writeFile(filename string, data *[]byte) error {
 	err := os.WriteFile(s.getFullPath(filename), *data, tools.Mode0600)
 	if err != nil {
 		return fmt.Errorf("failed write new card: %w", err)
@@ -223,7 +223,7 @@ func (s *Storage) NewData(eID uint, updateDT int64, title string, dataType model
 		m.UpdateDT = updateDT
 	}
 
-	err := s.WriteFile(filename, data)
+	err := s.writeFile(filename, data)
 	if err != nil {
 		return nil, fmt.Errorf("failed write new card: %w", err)
 	}
@@ -235,7 +235,7 @@ func (s *Storage) NewData(eID uint, updateDT int64, title string, dataType model
 
 func (s *Storage) EditData(id int64, m *models.FileMetaDataItem, data *[]byte) error {
 	s.log.Debug("edit data", zap.Int64("id", id), zap.String("meta", fmt.Sprint(*m)), zap.Int("len", len(*data)))
-	err := s.WriteFile(m.OriginalPath, data)
+	err := s.writeFile(m.OriginalPath, data)
 	if err != nil {
 		return fmt.Errorf("faieled write file: %w", err)
 	}

@@ -49,6 +49,7 @@ func run() error {
 		logger.SetLogPath(cfg.LogPath),
 		logger.SetEnableTerminalOutput(false),
 	)
+
 	if err != nil {
 		return fmt.Errorf("failed initialize logger: %w", err)
 	}
@@ -68,7 +69,7 @@ func run() error {
 		ctx,
 		store,
 		lgr,
-		uiapi.SetConfig(*cfg.Client),
+		uiapi.SetAPIHost(cfg.Client.APIAddress),
 		uiapi.SetFileMaxSize(cfg.FileMaxSize),
 	)
 	if err != nil {
@@ -79,6 +80,12 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("failed initialize client: %w", err)
 	}
+	lgr.Info("Build",
+		zap.String("version", buildVersion),
+		zap.String("data", buildDate),
+		zap.String("commit", buildCommit),
+		zap.String("server", cfg.Client.APIAddress),
+	)
 	go func() {
 		defer cancel()
 		if err := client.Run(nil); err != nil {

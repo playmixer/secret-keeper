@@ -26,6 +26,10 @@ type Config struct {
 	FileMaxSize int64  `env:"FILE_MAX_SIZE"`
 }
 
+var (
+	defaultFileMaxSizeUpload int64 = 819200
+)
+
 // Init - инициализация конфига.
 func Init(isClient bool) (*Config, error) {
 	cfg := &Config{
@@ -34,8 +38,9 @@ func Init(isClient bool) (*Config, error) {
 			Database: database.Config{},
 		},
 		Client: &uiapi.Config{
-			APIAddress: "http://localhost:8080",
+			APIAddress: "https://localhost:8443",
 		},
+		FileMaxSize: defaultFileMaxSizeUpload,
 	}
 
 	cfgFile := ".env"

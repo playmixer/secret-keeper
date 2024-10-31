@@ -111,7 +111,9 @@ func (s *Server) handlerLogin(c *gin.Context) {
 	user, err := s.keeper.Login(c.Request.Context(), jBody.Login, jBody.Password)
 	if err != nil {
 		if errors.Is(err, keeperr.ErrLoginOrPasswordNotCorrect) ||
-			errors.Is(err, keeperr.ErrNotFound) {
+			errors.Is(err, keeperr.ErrNotFound) ||
+			errors.Is(err, keeper.ErrLoginNotValid) ||
+			errors.Is(err, keeper.ErrPasswordNotValid) {
 			c.JSON(http.StatusUnauthorized, tResultErrorResponse{
 				Status: false,
 				Error:  "Login or password not correct",
@@ -139,28 +141,6 @@ func (s *Server) handlerLogin(c *gin.Context) {
 			Message: "User authenticated",
 		},
 		AccessToken: accessToken,
-	})
-}
-
-// @Summary	Login user
-// @Schemes
-// @Description	login user
-// @Tags			user
-// @Param			Authorization	header	string	true	"authorization"
-// @Accept			json
-// @Produce		json
-// @Success		200	{object}	tHandlerLoginResponse	"пользователь успешно аутентифицирован"
-// @failure		500	"внутренняя ошибка сервера"
-// @Router			/user/info [get]
-func (s *Server) handlerUserInfo(c *gin.Context) {
-	userID, err := s.authUserID(c)
-	if err != nil {
-		c.Writer.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"user_id": userID,
 	})
 }
 

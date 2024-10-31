@@ -2,11 +2,14 @@ package logger
 
 import (
 	"fmt"
+	"log"
 	"os"
+	"path/filepath"
 
-	"github.com/playmixer/secret-keeper/pkg/tools"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+
+	"github.com/playmixer/secret-keeper/pkg/tools"
 )
 
 type loggerConfigurator struct {
@@ -54,6 +57,13 @@ func New(options ...option) (*zap.Logger, error) {
 
 	for _, opt := range options {
 		opt(&cfg)
+	}
+
+	if cfg.logPath != "" {
+		err := os.MkdirAll(filepath.Dir(cfg.logPath), tools.Mode0750)
+		if err != nil {
+			log.Println("failed create directory for logs")
+		}
 	}
 
 	stdout := zapcore.AddSync(os.Stdout)

@@ -81,6 +81,7 @@ func New(keeper Keeper, options ...option) (*Server, error) {
 	s := &Server{
 		srv:    &http.Server{},
 		keeper: keeper,
+		log:    zap.NewNop(),
 	}
 
 	for _, opt := range options {
@@ -103,7 +104,6 @@ func (s *Server) Engin() *gin.Engine {
 		user := api.Group("/user")
 		user.Use(s.middlewareAuthorization)
 		{
-			user.GET("/info", s.handlerUserInfo)
 			user.GET("/data", s.handlerGetDatas)
 			user.GET("/data/:id", s.handlerGetData)
 			user.POST("/data", s.handlerNewData)
@@ -126,7 +126,7 @@ func (s *Server) Run() error {
 			return fmt.Errorf("server has failed: %w", err)
 		}
 	case true:
-		if err := s.srv.ListenAndServeTLS("./cert/localhost.crt", "./cert/localhost.key"); err != nil {
+		if err := s.srv.ListenAndServeTLS("./cert/gophkeeper.crt", "./cert/gophkeeper.key"); err != nil {
 			return fmt.Errorf("server has failed: %w", err)
 		}
 	}

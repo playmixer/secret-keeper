@@ -1,13 +1,8 @@
 package tools
 
 import (
-	"bytes"
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
-	"io"
-	"os"
-	"path/filepath"
 	"time"
 
 	"golang.org/x/exp/rand"
@@ -33,31 +28,7 @@ func RandomString(n uint) string {
 	return string(b)
 }
 
-func SaveUploadedFile(data *[]byte, dst string) error {
-	if err := os.MkdirAll(filepath.Dir(dst), Mode0750); err != nil {
-		return fmt.Errorf("failed create dir: %w", err)
-	}
-
-	buf := bytes.NewBuffer(*data)
-
-	out, err := os.Create(dst)
-	if err != nil {
-		return fmt.Errorf("failed create file: %w", err)
-	}
-
-	_, err = io.Copy(out, buf)
-	if err != nil {
-		return fmt.Errorf("failed copy: %w", err)
-	}
-
-	err = out.Close()
-	if err != nil {
-		return fmt.Errorf("failed close file: %w", err)
-	}
-
-	return nil
-}
-
+// GetMD5Hash вернет md5 хеш  текста.
 func GetMD5Hash(text string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(text))

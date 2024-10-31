@@ -57,7 +57,7 @@ func (k *keepClient) EventAuthorization(login, password string) error {
 	}()
 
 	if r.StatusCode == http.StatusUnauthorized {
-		return errors.New("логии или пароль не верный")
+		return errors.New("неверные данные авторизации")
 	}
 
 	result := tSignInResponse{}
@@ -282,31 +282,33 @@ func (k *keepClient) eventDeleteData(id int64) error {
 	return nil
 }
 
-func (k *keepClient) newRequest(method string, url string, data *[]byte) (*http.Response, error) {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{
-		Transport: tr,
-	}
+func newRequest(k *keepClient) func(method string, url string, data *[]byte) (*http.Response, error) {
+	return func(method, url string, data *[]byte) (*http.Response, error) {
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		client := &http.Client{
+			Transport: tr,
+		}
 
-	if data == nil {
-		data = &[]byte{}
-	}
+		if data == nil {
+			data = &[]byte{}
+		}
 
-	body := bytes.NewBuffer(*data)
-	var req *http.Request
-	req, err := http.NewRequest(method, url, body)
-	if err != nil {
-		return nil, fmt.Errorf("failed create http client: %w", err)
-	}
-	req.Header.Set("Authorization", "Bearer "+k.token)
-	res, err := client.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf(formatStringError, errMessageFailedRequest, err)
-	}
+		body := bytes.NewBuffer(*data)
+		var req *http.Request
+		req, err := http.NewRequest(method, url, body)
+		if err != nil {
+			return nil, fmt.Errorf("failed create http client: %w", err)
+		}
+		req.Header.Set("Authorization", "Bearer "+k.token)
+		res, err := client.Do(req)
+		if err != nil {
+			return nil, fmt.Errorf(formatStringError, errMessageFailedRequest, err)
+		}
 
-	return res, nil
+		return res, nil
+	}
 }
 
 func (k *keepClient) eventGetExternalMetaDatas() (*[]models.MetaDataItem, error) {

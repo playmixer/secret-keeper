@@ -66,7 +66,7 @@ func (k *Keeper) Registration(ctx context.Context, login, password string) error
 		return fmt.Errorf("password invalid: %w", err)
 	}
 
-	passwordHash, err := HashPassword(password)
+	passwordHash, err := hashPassword(password)
 	if err != nil {
 		return fmt.Errorf("failed hashing password: %w", err)
 	}

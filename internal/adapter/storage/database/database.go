@@ -36,14 +36,14 @@ func New(dsn string) (*Storage, error) {
 		db: gormDB,
 	}
 
-	if err := db.Migration(); err != nil {
+	if err := db.migration(); err != nil {
 		return nil, fmt.Errorf("failed auto migrations: %w", err)
 	}
 
 	return db, nil
 }
 
-func (s *Storage) Migration() error {
+func (s *Storage) migration() error {
 	if err := s.db.AutoMigrate(&models.User{}, &models.Secret{}); err != nil {
 		return fmt.Errorf("failed migrations: %w", err)
 	}

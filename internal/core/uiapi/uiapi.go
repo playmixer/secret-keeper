@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
-	"go.uber.org/zap"
-
 	"github.com/playmixer/secret-keeper/internal/adapter/models"
+	"go.uber.org/zap"
 )
 
 type store interface {
@@ -37,18 +37,20 @@ var (
 )
 
 type keepClient struct {
-	store       store
-	log         *zap.Logger
-	apiURL      string
-	token       string
-	fileMaxSize int64
+	store         store
+	log           *zap.Logger
+	newRequest    func(method string, url string, data *[]byte) (*http.Response, error)
+	apiURL        string
+	token         string
+	fileMaxSize   int64
+	workerEnabled bool
 }
 
 type option func(*keepClient)
 
-func SetConfig(cfg Config) option {
+func SetAPIHost(host string) option {
 	return func(k *keepClient) {
-		k.apiURL = cfg.APIAddress
+		k.apiURL = host
 	}
 }
 
@@ -58,18 +60,29 @@ func SetFileMaxSize(size int64) option {
 	}
 }
 
+func SetEnableWorker(enable bool) option {
+	return func(kc *keepClient) {
+		kc.workerEnabled = enable
+	}
+}
+
 func New(ctx context.Context, store store, lgr *zap.Logger, options ...option) (*keepClient, error) {
 	k := &keepClient{
-		store:       store,
-		log:         lgr,
-		fileMaxSize: kilobyte * byte8,
+		store:         store,
+		log:           lgr,
+		fileMaxSize:   kilobyte * byte8,
+		workerEnabled: true,
+		apiURL:        "https://localhost:8443",
 	}
+	k.newRequest = newRequest(k)
 
 	for _, opt := range options {
 		opt(k)
 	}
 
-	go k.worker(ctx)
+	if k.workerEnabled {
+		go k.worker(ctx)
+	}
 
 	return k, nil
 }

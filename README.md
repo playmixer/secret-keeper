@@ -53,25 +53,24 @@ GophKeeper представляет собой клиент-серверную �
 
 
 # Server GophKeeper
-### Run server
-```bash
+## Run server
+
+### 1. клонируем проект
+```env
 git clone https://github.com/playmixer/secret-keeper.git
-cd secret-keeper/deploy
+```
+### 2. генерируем сертификаты (выполнить из корня проекта) или запустить ./scripts/get_cert.sh
+```env
+mkdir ./cert
+openssl genrsa -out ./cert/gophkeeper.key 2048
+openssl ecparam -genkey -name secp384r1 -out ./cert/gophkeeper.key
+openssl req -new -x509 -sha256 -key ./cert/gophkeeper.key -out ./cert/gophkeeper.crt -days 3650
+```
+### 3. запускаем сервер
+```bash
+cd deploy
 docker-compose up
 ```
-
-### enviorement example
-```env
-REST_ADDRESS=localhost:8080
-SSL_ENABLE=1
-LOG_LEVEL=debug
-LOG_PATH=./logs/server.log
-SECRET_KEY=secret_key
-DATABASE_STRING=postgres://root:root@localhost:5432/keeper?sslmode=disable
-ENCRYPT_KEY=RZLMAOIOuljexYLh5S47O9kfVI7O1Ll0
-```
-для ENCRYPT_KEY длина должна быть 32 символа
-
 ### generate swag and run
 ```bash
 swag init -o ./docs -g ./internal/adapter/api/rest/rest.go
@@ -81,21 +80,41 @@ go run ./cmd/server/server.go
 ссылка на swagger
 https://localhost:8443/swagger/index.html
 
-
+## Пример .env
+```env
+REST_ADDRESS=localhost:8443
+SSL_ENABLE=1
+LOG_LEVEL=debug
+LOG_PATH=./logs/server.log
+SECRET_KEY=secret_key
+DATABASE_STRING=postgres://root:root@localhost:5432/keeper?sslmode=disable
+ENCRYPT_KEY=RZLMAOIOuljexYLh5S47O9kfVI7O1Ll0
+```
+для ENCRYPT_KEY длина должна быть 32 символа
 
 # Client GophKeeper
-### Build client
+## Запуск клиента
+#### Вариант 1
+* билдим
 ```bash
-go build -ldflags "-X main.buildVersion=v1.0.0 -X 'main.buildDate=$(date +'%Y/%m/%d %H:%M:%S')' -X 'main.buildCommit=$(git show --oneline -s)'" ./cmd/client/client.go
+go build -ldflags "-X main.buildVersion=1.0.0 -X 'main.buildDate=$(date +'%Y/%m/%d %H:%M:%S')' -X 'main.buildCommit=$(git show --oneline -s)'" ./cmd/client/client.go
 ```
+или ./scripts/build_client.sh
+* запускаем скомпилированый файл, для windows ***client.exe***
 
-### Run client
+### Вариант 2
 ```bash
 go run -ldflags "-X main.buildVersion=1.0.0 -X 'main.buildDate=$(date +'%Y/%m/%d %H:%M:%S')' -X 'main.buildCommit=$(git show --oneline -s)'" ./cmd/client/client.go
 ```
+или ./scripts/run_client.sh
 
-### Enviorements 
-рядом с клиентом положить файл *.env.client*
+```text
+По умолчанию клиент подключается к https://localhost:8443
+```
+
+### Глобальные переменные клиента
+При необходимости рядом с клиентом разместить файл ***.env.client***, 
+с содержимым
 ```env
 API_ADDRESS=https://localhost:8443
 LOG_LEVEL=debug
@@ -105,6 +124,11 @@ FILE_MAX_SIZE=819200
 
 ### Тесты
 в работе
+### покрытие
+```shel
+go test -v -coverpkg=./... -coverprofile=profile.cov ./...
+go tool cover -func profile.cov
+```
 
 
 
