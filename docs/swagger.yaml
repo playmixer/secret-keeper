@@ -1,0 +1,429 @@
+basePath: /api/v0
+definitions:
+  models.DataType:
+    enum:
+    - CARD
+    - PASSWORD
+    - TEXT
+    - BINARY
+    type: string
+    x-enum-varnames:
+    - CARD
+    - PASSWORD
+    - TEXT
+    - BINARY
+  rest.THandlerDelDataResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  rest.THandlerGetDataResponse:
+    properties:
+      data:
+        $ref: '#/definitions/rest.tGetData'
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  rest.THandlerNewDataRequest:
+    properties:
+      data:
+        items:
+          type: integer
+        type: array
+      data_type:
+        $ref: '#/definitions/models.DataType'
+      title:
+        type: string
+      update_dt:
+        type: integer
+    type: object
+  rest.THandlerNewDataResponse:
+    properties:
+      data:
+        $ref: '#/definitions/rest.tNewData'
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  rest.THandlerUpdDataRequest:
+    properties:
+      data:
+        items:
+          type: integer
+        type: array
+      data_type:
+        $ref: '#/definitions/models.DataType'
+      is_deleted:
+        type: boolean
+      title:
+        type: string
+      update_dt:
+        type: integer
+    type: object
+  rest.THandlerUpdDataResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  rest.tGetData:
+    properties:
+      data:
+        items:
+          type: integer
+        type: array
+      data_type:
+        $ref: '#/definitions/models.DataType'
+      id:
+        type: integer
+      is_deleted:
+        type: boolean
+      title:
+        type: string
+      update_dt:
+        type: integer
+    type: object
+  rest.tHalderGetDatasResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/rest.tHandlerGetData'
+        type: array
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  rest.tHandlerGetData:
+    properties:
+      data_type:
+        $ref: '#/definitions/models.DataType'
+      id:
+        type: integer
+      is_deleted:
+        type: boolean
+      title:
+        type: string
+      update_dt:
+        type: integer
+    type: object
+  rest.tHandlerLoginRequest:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  rest.tHandlerLoginResponse:
+    properties:
+      access_token:
+        type: string
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  rest.tHandlerRegistrationRequest:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  rest.tHandlerRegistrationResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: boolean
+    type: object
+  rest.tNewData:
+    properties:
+      data_type:
+        $ref: '#/definitions/models.DataType'
+      id:
+        type: integer
+      title:
+        type: string
+      update_dt:
+        type: integer
+    type: object
+  rest.tResultErrorResponse:
+    properties:
+      error:
+        type: string
+      status:
+        type: boolean
+    type: object
+info:
+  contact: {}
+  title: «GophKeeper»
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: login user
+      parameters:
+      - description: auth
+        in: body
+        name: auth
+        required: true
+        schema:
+          $ref: '#/definitions/rest.tHandlerLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: пользователь успешно аутентифицирован
+          schema:
+            $ref: '#/definitions/rest.tHandlerLoginResponse'
+        "400":
+          description: неверный формат запроса
+          schema:
+            $ref: '#/definitions/rest.tResultErrorResponse'
+        "401":
+          description: логин или пароль не верный
+          schema:
+            $ref: '#/definitions/rest.tResultErrorResponse'
+        "500":
+          description: внутренняя ошибка сервера
+      summary: Login user
+      tags:
+      - auth
+  /auth/registration:
+    post:
+      consumes:
+      - application/json
+      description: registration user
+      parameters:
+      - description: registration
+        in: body
+        name: registration
+        required: true
+        schema:
+          $ref: '#/definitions/rest.tHandlerRegistrationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: пользователь успешно зарегистрирован
+          schema:
+            $ref: '#/definitions/rest.tHandlerRegistrationResponse'
+        "400":
+          description: неверный формат запроса
+          schema:
+            $ref: '#/definitions/rest.tResultErrorResponse'
+        "409":
+          description: логин уже занят
+          schema:
+            $ref: '#/definitions/rest.tResultErrorResponse'
+        "500":
+          description: внутренняя ошибка сервера
+      summary: Register user
+      tags:
+      - auth
+  /user/data:
+    get:
+      consumes:
+      - application/json
+      description: получить данные пользователя
+      parameters:
+      - description: authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: данные получены
+          schema:
+            $ref: '#/definitions/rest.tHalderGetDatasResponse'
+        "401":
+          description: ошибка авторизации
+        "500":
+          description: внутренняя ошибка сервера
+      summary: Get Datas
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      description: создать секрет
+      parameters:
+      - description: authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: данные
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/rest.THandlerNewDataRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: данные добавлены
+          schema:
+            $ref: '#/definitions/rest.THandlerNewDataResponse'
+        "400":
+          description: ошибка запроса
+          schema:
+            $ref: '#/definitions/rest.tResultErrorResponse'
+        "401":
+          description: ошибка авторизации
+        "500":
+          description: внутренняя ошибка сервера
+      summary: Create Data
+      tags:
+      - user
+  /user/data/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: удаляем данные
+      parameters:
+      - description: authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: данные удалены
+          schema:
+            $ref: '#/definitions/rest.THandlerDelDataResponse'
+        "204":
+          description: нет данных
+          schema:
+            $ref: '#/definitions/rest.tResultErrorResponse'
+        "400":
+          description: ошибка запроса
+          schema:
+            $ref: '#/definitions/rest.tResultErrorResponse'
+        "401":
+          description: ошибка авторизации
+        "500":
+          description: внутренняя ошибка сервера
+      summary: Delete Data
+      tags:
+      - user
+    get:
+      consumes:
+      - application/json
+      description: получить данные
+      parameters:
+      - description: authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: данные получены
+          schema:
+            $ref: '#/definitions/rest.THandlerGetDataResponse'
+        "204":
+          description: нет данных
+          schema:
+            $ref: '#/definitions/rest.tResultErrorResponse'
+        "400":
+          description: ошибка запроса
+          schema:
+            $ref: '#/definitions/rest.tResultErrorResponse'
+        "401":
+          description: ошибка авторизации
+        "500":
+          description: внутренняя ошибка сервера
+      summary: Get Data
+      tags:
+      - user
+    put:
+      consumes:
+      - application/json
+      description: обновить секрет
+      parameters:
+      - description: authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: authorization
+        in: body
+        name: card
+        required: true
+        schema:
+          $ref: '#/definitions/rest.THandlerUpdDataRequest'
+      - description: data id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: данные получены
+          schema:
+            $ref: '#/definitions/rest.THandlerUpdDataResponse'
+        "400":
+          description: ошибка запроса
+          schema:
+            $ref: '#/definitions/rest.tResultErrorResponse'
+        "401":
+          description: ошибка авторизации
+        "500":
+          description: внутренняя ошибка сервера
+      summary: Update Data
+      tags:
+      - user
+  /user/info:
+    get:
+      consumes:
+      - application/json
+      description: login user
+      parameters:
+      - description: authorization
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: пользователь успешно аутентифицирован
+          schema:
+            $ref: '#/definitions/rest.tHandlerLoginResponse'
+        "500":
+          description: внутренняя ошибка сервера
+      summary: Login user
+      tags:
+      - user
+swagger: "2.0"

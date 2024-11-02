@@ -52,7 +52,105 @@ GophKeeper представляет собой клиент-серверную �
 
 
 
-# build client
+# Server GophKeeper
+## Run server
+
+### 1. клонируем проект
+```env
+git clone https://github.com/playmixer/secret-keeper.git
+```
+### 2. генерируем сертификаты (выполнить из корня проекта) или запустить ./scripts/get_cert.sh
+```env
+mkdir ./cert
+openssl genrsa -out ./cert/gophkeeper.key 2048
+openssl ecparam -genkey -name secp384r1 -out ./cert/gophkeeper.key
+openssl req -new -x509 -sha256 -key ./cert/gophkeeper.key -out ./cert/gophkeeper.crt -days 3650
+```
+### 3. запускаем сервер
 ```bash
-go build -ldflags "-X main.buildVersion=v1.0.1 -X 'main.buildDate=$(date +'%Y/%m/%d %H:%M:%S')' -X 'main.buildCommit=$(git show --oneline -s)'" ./cmd/client/client.go
+cd deploy
+docker-compose up
+```
+### generate swag and run
+```bash
+swag init -o ./docs -g ./internal/adapter/api/rest/rest.go
+swag fmt
+go run ./cmd/server/server.go
+```
+ссылка на swagger
+https://localhost:8443/swagger/index.html
+
+## Пример .env
+```env
+REST_ADDRESS=localhost:8443
+SSL_ENABLE=1
+LOG_LEVEL=debug
+LOG_PATH=./logs/server.log
+SECRET_KEY=secret_key
+DATABASE_STRING=postgres://root:root@localhost:5432/keeper?sslmode=disable
+ENCRYPT_KEY=RZLMAOIOuljexYLh5S47O9kfVI7O1Ll0
+```
+для ENCRYPT_KEY длина должна быть 32 символа
+
+# Client GophKeeper
+## Запуск клиента
+#### Вариант 1
+* билдим
+```bash
+go build -ldflags "-X main.buildVersion=1.0.0 -X 'main.buildDate=$(date +'%Y/%m/%d %H:%M:%S')' -X 'main.buildCommit=$(git show --oneline -s)'" ./cmd/client/client.go
+```
+или ./scripts/build_client.sh
+* запускаем скомпилированый файл, для windows ***client.exe***
+
+### Вариант 2
+```bash
+go run -ldflags "-X main.buildVersion=1.0.0 -X 'main.buildDate=$(date +'%Y/%m/%d %H:%M:%S')' -X 'main.buildCommit=$(git show --oneline -s)'" ./cmd/client/client.go
+```
+или ./scripts/run_client.sh
+
+```text
+По умолчанию клиент подключается к https://localhost:8443
+```
+
+### Глобальные переменные клиента
+При необходимости рядом с клиентом разместить файл ***.env.client***, 
+с содержимым
+```env
+API_ADDRESS=https://localhost:8443
+LOG_LEVEL=debug
+LOG_PATH=./logs/client.log
+FILE_MAX_SIZE=819200
+```
+
+### Тесты
+в работе
+### покрытие
+```shel
+go test -v -coverpkg=./... -coverprofile=profile.cov ./...
+go tool cover -func profile.cov
+```
+
+
+
+### fix fieldalignment
+```
+go install golang.org/x/tools/go/analysis/passes/fieldalignment/cmd/fieldalignment@latest
+```
+```
+fieldalignment -fix <package_path>
+```
+
+
+#### Generate private key (.key)
+```
+# Key considerations for algorithm "RSA" ≥ 2048-bit
+openssl genrsa -out server.key 2048
+
+# Key considerations for algorithm "ECDSA" ≥ secp384r1
+# List ECDSA the supported curves (openssl ecparam -list_curves)
+openssl ecparam -genkey -name secp384r1 -out server.key
+```
+#### Generation of self-signed(x509) public key (PEM-encodings .pem|.crt) based on the private (.key)
+```
+openssl req -new -x509 -sha256 -key server.key -out server.crt -days 3650
 ```

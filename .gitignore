@@ -1,0 +1,11 @@
+.env
+.env.*
+*.exe
+
+profile.cov
+
+golangci-lint
+data
+logs
+app
+cert
